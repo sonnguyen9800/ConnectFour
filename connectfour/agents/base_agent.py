@@ -44,7 +44,6 @@ class TestAgent(RandomAgent):
 
             if row >= 0:
                 break
-
         return row, col
 
     def evaluateBoardState(self, board, player):

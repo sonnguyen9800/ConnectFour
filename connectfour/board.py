@@ -57,8 +57,8 @@ class Board(object):
         """
         if move < 0 or move >= self.width or self.board[0][move] != 0:
             return -1
-
-        for i in range(len(self.board)):
+        #print("Board {}".format(len(self.board)))
+        for i in range(6):
             if self.board[i][move] != 0:
                 return i - 1
         return len(self.board) - 1
@@ -82,7 +82,11 @@ class Board(object):
         """
         for col in range(self.width):
             for row in range(self.height):
+                #print("Evaluate: {};{}".format(row, col))
+
                 if self.valid_move(row, col):
+                    #print("Valid: {};{}".format(row, col))
+
                     yield (row, col)
 
     def terminal(self):
@@ -127,8 +131,10 @@ class Board(object):
             return 0
 
         row = next_board.try_move(col)
+
         next_board.board[row][col] = turn
         next_board.last_move = [row, col]
+
         return next_board
 
     def _empty_board(self, height, width):
@@ -242,15 +248,6 @@ class Board(object):
             this_difference += current_score_array[player][win_index]
             other_difference += current_score_array[other_player][win_index]
             current_score_array[player][win_index] += 1
-
-        # TODO: Don't think we need this
-        # if (agent != NULL)
-        # {
-        #    score = agent->agentFunction(current_state, player, x, y);
-        #
-        #    current_state->score[player] = score;
-        #    current_state->score[other_player] = 0;
-        # }
 
     def _build_winning_zones_map(self):
         size_y = self.height

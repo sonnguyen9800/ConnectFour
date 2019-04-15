@@ -50,5 +50,5 @@ class RandomAgent(Agent):
 
             if row >= 0:
                 break
-
+        #print("Random Agent Select: {} ; {}".format(row, col))
         return row, col
