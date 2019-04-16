@@ -1,31 +1,28 @@
-import numpy as np
+import copy
 
 from connectfour.agents.computer_player import RandomAgent
-import copy
-import logging
-
+import math
 
 class StudentAgent(RandomAgent):
     main_board = 1
 
     def __init__(self, name):
         super().__init__(name)
-        self.MaxDepth = 2
+        self.MaxDepth = 4
 
     def get_move(self, board):
-        logging.info("get_move")
-        valid_moves = board.valid_moves()  # Get the valid moves from the board
-        logging.info("get_valid_moves")
+
+        valid_moves = board.valid_moves()
         vals = []
         moves = []
 
         for move in valid_moves:
-            next_state = board.next_state(self.id,
-                                          move[1])  # Create the next state: next_state take: id (first parameter) &
+            next_state = board.next_state(self.id, move[1])
             moves.append(move)
             vals.append(self.dfMiniMax(next_state, 1))
 
         bestMove = moves[vals.index(max(vals))]
+
         return bestMove
 
     def dfMiniMax(self, board, depth):
@@ -54,64 +51,134 @@ class StudentAgent(RandomAgent):
         return bestVal  #
 
     def evaluateBoardState(self, board):
+        flag = True
+        extreme_check = 0
+        if board.winner() == self.id:
+            # print("YOU WIN")
+            return math.inf
+        elif board.winner() == (self.id % 2 + 1):
+            # print("You Lose")
+            return -math.inf
 
-        old_post_array = self.marked_token(board)
+        step_to_win_allies = self.close_to_win(board, self.id)
+        step_to_win_enemy = self.close_to_win(board, self.id % 2 + 1)
 
-        correct_segment = self.get_all_correct_segments(board)
-        #print("Size Correct Segment {}".format(len(correct_segment)))
+        # print("Step to Win Allies {}".format(step_to_win_allies))
+        # print("Step to Win Enemy {}".format(step_to_win_enemy))
+        # print("Turn For Player {}".format(self.what_turn(board)))
+
+        #Death_thread: lose 100%
+        if (step_to_win_enemy >= 2):
+            extreme_check = -100000
+        #Enemy need one more turn to win and also  it is his/her turn
+        if step_to_win_enemy == 1 and (self.what_turn(board) != (self.id )):
+            extreme_check = -100000
+        #Our team has one more turn to win and also now it is our turn
+        if step_to_win_allies >= 1 and (self.what_turn(board) == (self.id)):
+            extreme_check =  100000
+
+
+
+
+        #if step_to_win_allies >= 1
+
+        # if (board.height == 6 and board.width == 7) and flag == True:
+        #     extra_element_allie = calculate_weigh(board, self.id)
+        #     extra_element_enemy = calculate_weigh(board, self.id % 2 + 1)
+
+        old_post_array_our = self.marked_token(board, self.id)
+        old_post_array_enemy = self.marked_token(board, self.id % 2 + 1)
+
+        correct_segment = self.get_all_correct_segments(board, self.id)
+        correct_segment_enemy = self.get_all_correct_segments(board, self.id % 2 + 1)
+
         n1 = 0
         for i in correct_segment:
-            if i.count_old_pos(old_post_array) == 1:
+            if i.count_old_pos(old_post_array_our) == 1:
                 n1 += 1
-        #print("N1: {}".format(n1))
+        # print("N1: {}".format(n1))
         n2 = 0
         for i in correct_segment:
-            if i.count_old_pos(old_post_array) == 2:
+            if i.count_old_pos(old_post_array_our) == 2:
                 n2 += 1
-        #print("N2: {}".format(n2))
+        # print("N2: {}".format(n2))
         n3 = 0
         for i in correct_segment:
-            if i.count_old_pos(old_post_array) == 3:
+            if i.count_old_pos(old_post_array_our) == 3:
                 n3 += 1
-        #print("N3: {}".format(n3))
+        # print("N3: {}".format(n3))
         n4 = 0
         for i in correct_segment:
-            if i.count_old_pos(old_post_array) == 4:
+            if i.count_old_pos(old_post_array_our) == 4:
                 n4 += 1
-        #print("N4: {}".format(n4))
-        return self.evaluate(n4, n3, n2, n1)
+        n1_enemy = 0
+        for i in correct_segment_enemy:
+            if i.count_old_pos(old_post_array_enemy) == 1:
+                n1_enemy += 1
+        # print("N1: {}".format(n1_enemy))
+        n2_enemy = 0
+        for i in correct_segment_enemy:
+            if i.count_old_pos(old_post_array_enemy) == 2:
+                n2_enemy += 1
+        # print("N2: {}".format(n2_enemy))
+        n3_enemy = 0
+        for i in correct_segment_enemy:
+            if i.count_old_pos(old_post_array_enemy) == 3:
+                n3_enemy += 1
+        # print("N3: {}".format(n3))
+        n4_enemy = 0
+        for i in correct_segment_enemy:
+            if i.count_old_pos(old_post_array_enemy) == 4:
+                n4_enemy += 1
+        # print("N4: {}".format(n4))
 
-    def marked_token(self, board):
+        if flag:
+            print("N1 : {} ; N2 : {} ; N3 {} ; N4 {}:".format(n1, n2, n3, n4) )
+            print("Evaluate: {}".format(self.evaluate(n4, n3, n2, n1)))
+            print("Enemy: N1 : {} ; N2 : {} ; N3 {} ; N4 {}:".format(n1_enemy, n2_enemy, n3_enemy, n4_enemy) )
+            print("Evaluate: {}".format(self.evaluate(n4_enemy, n3_enemy, n2_enemy, n1_enemy)))
+            print("Extreme Check: {}".format(extreme_check))
+            print("Need {} steps to win".format(step_to_win_allies))
+            print("Need {} steps to lose".format(step_to_win_enemy))
+            print("Current Turn belong to player {}".format(self.what_turn(board)))
+
+
+
+        return self.evaluate(n4, n3, n2, n1) \
+               - self.evaluate(n4_enemy, n3_enemy, n2_enemy, n1_enemy) \
+               + extreme_check
+
+    def marked_token(self, board, id):
         array = []
         # Return : a list of location (row,list) - they are all location of token that are marked
         for row in range(board.height):
             for col in range(board.width):
-                if board.get_cell_value(row, col) == self.id:
+                if board.get_cell_value(row, col) == id:
                     array.append([row, col])
         return array
 
-    def fill_all_pos(self, board):
-        #DONE
+    def fill_all_pos(self, board, id):
+        # DONE
         board_copy = copy.deepcopy(board)
         for row in range(board.height):
             for col in range(board.width):
                 if board_copy.get_cell_value(row, col) == 0:
-                    board_copy.board[row][col] = self.id
+                    board_copy.board[row][col] = id
 
         return board_copy
 
-    def get_all_correct_segments(self, board):
+    def get_all_correct_segments(self, board, id):
 
         # 1. filling the board_copy with self.token - create object broad_copy - DONE
-        board_copy = self.fill_all_pos(board)
+        board_copy = self.fill_all_pos(board, id)
 
         # 2. Making a list of correct segment
         correct_segment = []
 
-        correct_segment_row = self.get_correct_segment_row(board_copy)
-        correct_segment_col = self.get_correct_segment_col(board_copy)
-        correct_segment_dia = self.get_correct_segment_dia(board_copy)
-        #print("Get all Segment Row: {}".format(len(correct_segment_row)))
+        correct_segment_row = self.get_correct_segment_row(board_copy, id)
+        correct_segment_col = self.get_correct_segment_col(board_copy, id)
+        correct_segment_dia = self.get_correct_segment_dia(board_copy, id)
+        # print("Get all Segment Row: {}".format(len(correct_segment_row)))
 
         for i in correct_segment_row:
             correct_segment.append(i)
@@ -123,33 +190,32 @@ class StudentAgent(RandomAgent):
 
     @staticmethod
     def evaluate(num_four, num_opening_three, num_opening_two, num_opening_one):
-        return 1 * num_opening_one + 10 * num_opening_two + 100 * num_opening_three + 10000 * num_four
+        return 1 * num_opening_one + 10 * num_opening_two + 100 * num_opening_three
 
-    def get_correct_segment_row(self, board):
+    def get_correct_segment_row(self, board, id):
         all_row_segment = []
-        #print(np.matrix(board.board))
+        # print(np.matrix(board.board))
         for row in range(0, board.height):
 
             for col in range(0, board.width - board.num_to_connect + 1):
 
                 flag = True
-                #Check from [row, col] to [row, col+3] and see if they make a correct segment
+                # Check from [row, col] to [row, col+3] and see if they make a correct segment
                 for i in range(col, col + board.num_to_connect):
-                    if board.get_cell_value(row, i) != self.id:
+                    if board.get_cell_value(row, i) != id:
                         flag = False
                         break
 
-                #If they did make a correct segment- create a Segment Object and input the position of correct node
+                # If they did make a correct segment- create a Segment Object and input the position of correct node
                 if flag == True:
                     row_segment = Segment()
                     for i in range(col, col + board.num_to_connect):
                         row_segment.add_pos([row, i])
                     all_row_segment.append(row_segment)
 
-
         return all_row_segment
 
-    def get_correct_segment_col(self, board):
+    def get_correct_segment_col(self, board, id):
         all_col_segment = []
 
         for col in range(0, board.width):
@@ -159,7 +225,7 @@ class StudentAgent(RandomAgent):
                 flag = True
                 # Check from [row, col] to [row+3, col] and see if they make a correct segment
                 for i in range(row, row + board.num_to_connect):
-                    if board.get_cell_value(i, col) != self.id:
+                    if board.get_cell_value(i, col) != id:
                         flag = False
                         break
 
@@ -172,12 +238,12 @@ class StudentAgent(RandomAgent):
 
         return all_col_segment
 
-    def get_correct_segment_dia(self, board):
+    def get_correct_segment_dia(self, board, id):
 
         all_dia_correct_segment = []
         # For the dash //
 
-        for row in range(board.num_to_connect -1, board.height):
+        for row in range(board.num_to_connect - 1, board.height):
             for col in range(board.width - 3):
 
                 flag = True
@@ -185,12 +251,11 @@ class StudentAgent(RandomAgent):
                 sub_col = 0
                 for i in range(board.num_to_connect):
 
-                    if board.get_cell_value(row + sub_row, col + sub_col) != self.id:
+                    if board.get_cell_value(row + sub_row, col + sub_col) != id:
                         flag = False
                         break
                     sub_row -= 1
                     sub_col += 1
-
 
                 sub_row = 0
                 sub_col = 0
@@ -210,7 +275,7 @@ class StudentAgent(RandomAgent):
                 sub = 0
                 for i in range(board.num_to_connect):
 
-                    if board.get_cell_value(row + sub, col + sub) != self.id:
+                    if board.get_cell_value(row + sub, col + sub) != id:
                         flag = False
                         break
                     sub += 1
@@ -225,6 +290,100 @@ class StudentAgent(RandomAgent):
 
         return all_dia_correct_segment
 
+    def close_to_win(self, board, id):
+        score = 0
+        board_cp = copy.deepcopy(board)
+        for i in range(board_cp.width):
+            if board_cp.try_move(i) == -1:
+                continue
+            sub_board = board_cp.next_state(id, i)
+            if sub_board.winner() == id:
+                score += 1
+        if (score >= 2):
+            return 2
+        if (score == 1):
+            return 1
+        return 0
+
+    def cannot_block(self, board, id_enemy):
+
+
+        return False
+
+    def what_turn(self, board):
+        count_turn_num_1 = 0
+        count_turn_num_2 = 0
+        token1 = 0
+        token2 = 0
+
+        #find for token 1
+        for row in range(board.height):
+            flag = False
+            for col in range(board.width):
+                if board.get_cell_value(row, col) != 0:
+                    token1 = board.get_cell_value(row, col)
+                    flag = True
+                    break
+            if flag:
+                break
+            else:
+                continue
+        #find for token 2
+        for row in range(board.height):
+            flag = False
+            for col in range(board.width):
+                if board.get_cell_value(row, col) != 0 and board.get_cell_value(row, col) != token1:
+                    token2 = board.get_cell_value(row, col)
+                    flag = True
+                    break
+            if flag:
+                break
+            else:
+                continue
+
+        for row in range(board.height):
+            for col in range(board.width):
+                if board.get_cell_value(row, col) == token1:
+                    count_turn_num_1 += 1
+                if board.get_cell_value(row, col) == token2:
+                    count_turn_num_2 += 1
+
+
+        print("Player {} moved {} turn".format(token1, count_turn_num_1))
+        print("Player {} moved {} turn".format(token2, count_turn_num_2))
+
+        if (count_turn_num_1 == count_turn_num_2):
+            return token1
+        else:
+            return token2
+
+def calculate_weigh(board, id):
+    sum_weight = 0
+    # print("Type of Board: {}".format(id))
+    for i in range(board.height):
+        for j in range(board.width):
+            if board.get_cell_value(i, j) == id:
+                sum_weight += getWeight(i, j)
+    for i in range(board.width):
+        if board.try_move(i) != -1:
+            sum_weight += getWeight(board.try_move(i), i)
+    # print(sum_weight)
+    return sum_weight
+
+
+weigh_table = [
+    [3, 4, 5, 7, 5, 4, 3],
+    [4, 6, 8, 10, 8, 6, 4],
+    [5, 8, 11, 13, 11, 8, 5],
+    [5, 8, 11, 13, 11, 8, 5],
+    [4, 6, 8, 10, 8, 6, 4],
+    [3, 4, 5, 7, 5, 4, 3]
+]
+
+
+def getWeight(row, col):
+    return weigh_table[row][col]
+
 
 class Segment:
     position_array = []
@@ -235,15 +394,11 @@ class Segment:
     def add_pos(self, element):
         self.position_array.append(element)
 
-
-
     def __str__(self):
         return self.position_array
 
-
     def get_size(self):
         return self.position_array.__sizeof__()
-
 
     def count_old_pos(self, array):
         count = 0

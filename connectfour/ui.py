@@ -61,8 +61,8 @@ class Terrain(Canvas):
     Board visual representation
     """
 
-    PLAYER_ONE_TOKEN_COLOR = "yellow"
-    PLAYER_TWO_TOKEN_COLOR = "red"
+    PLAYER_ONE_TOKEN_COLOR = "red"
+    PLAYER_TWO_TOKEN_COLOR = "yellow"
     EMPTY_SLOT_COLOR = "white"
 
     def __init__(self, game, info, master=None):

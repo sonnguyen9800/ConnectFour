@@ -10,7 +10,7 @@ from connectfour.agents.agent import HumanPlayer
 
 
 MAX_GAME_WIDTH = MAX_GAME_HEIGHT = 100
-MIN_GAME_WIDTH = MIN_GAME_HEIGHT = 4
+MIN_GAME_WIDTH = MIN_GAME_HEIGHT = 3
 
 PLAYER_TYPE_MAP = {
     'HumanPlayer': HumanPlayer,
@@ -114,7 +114,10 @@ def main():
         "--player-two",
         dest="player_two",
         action="store",
+        #default='RandomAgent',
+        #default = "HumanPlayer",
         default="StudentAgent",
+        #default="MonteCarloAgent",
         help="Set the agent for player two of the game",
     )
     parser.add_argument(
