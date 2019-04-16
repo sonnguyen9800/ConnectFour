@@ -114,9 +114,9 @@ def main():
         "--player-two",
         dest="player_two",
         action="store",
-        #default='RandomAgent',
+        default='RandomAgent',
         #default = "HumanPlayer",
-        default="StudentAgent",
+        #default="StudentAgent",
         #default="MonteCarloAgent",
         help="Set the agent for player two of the game",
     )
