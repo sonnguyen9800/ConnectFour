@@ -72,6 +72,7 @@ def validate_args(args):
     p2 = 0
 
     print("player one = ", args.player_one)
+    print("play two = ", args.player_two)
 
     if args.player_one not in PLAYER_TYPE_MAP:
         #print("here")
@@ -114,10 +115,10 @@ def main():
         "--player-two",
         dest="player_two",
         action="store",
-        default='RandomAgent',
+        #default='RandomAgent',
         #default = "HumanPlayer",
         #default="StudentAgent",
-        #default="MonteCarloAgent",
+        default="MonteCarloAgent",
         help="Set the agent for player two of the game",
     )
     parser.add_argument(
