@@ -51,7 +51,7 @@ class StudentAgent(RandomAgent):
         return bestVal  #
 
     def evaluateBoardState(self, board):
-        flag = True
+        flag = False
         extreme_check = 0
         if board.winner() == self.id:
             # print("YOU WIN")
@@ -305,12 +305,8 @@ class StudentAgent(RandomAgent):
             return 1
         return 0
 
-    def cannot_block(self, board, id_enemy):
-
-
-        return False
-
-    def what_turn(self, board):
+    @staticmethod
+    def what_turn(board):
         count_turn_num_1 = 0
         count_turn_num_2 = 0
         token1 = 0
@@ -356,34 +352,6 @@ class StudentAgent(RandomAgent):
             return token1
         else:
             return token2
-
-def calculate_weigh(board, id):
-    sum_weight = 0
-    # print("Type of Board: {}".format(id))
-    for i in range(board.height):
-        for j in range(board.width):
-            if board.get_cell_value(i, j) == id:
-                sum_weight += getWeight(i, j)
-    for i in range(board.width):
-        if board.try_move(i) != -1:
-            sum_weight += getWeight(board.try_move(i), i)
-    # print(sum_weight)
-    return sum_weight
-
-
-weigh_table = [
-    [3, 4, 5, 7, 5, 4, 3],
-    [4, 6, 8, 10, 8, 6, 4],
-    [5, 8, 11, 13, 11, 8, 5],
-    [5, 8, 11, 13, 11, 8, 5],
-    [4, 6, 8, 10, 8, 6, 4],
-    [3, 4, 5, 7, 5, 4, 3]
-]
-
-
-def getWeight(row, col):
-    return weigh_table[row][col]
-
 
 class Segment:
     position_array = []
